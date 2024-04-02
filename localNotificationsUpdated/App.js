@@ -94,6 +94,11 @@ export default function App() {
     
     <NavigationContainer>
       <Stack.Navigator>
+      <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ title: "Login" }}
+        />
         <Stack.Screen
           name="Home"
           component={HomeScreen}
@@ -146,6 +151,110 @@ input:{
 },
 
 });
+
+const LoginScreen = ({ navigation ,route}) => {
+  const [email, onChangeEmail] = useState("Enter Email");
+  const [password, onChangePass] = useState("Enter Password");
+  const [text, onChangeText] = useState("");
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "#fff",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  input:{
+    height:40,
+    width: '100%',
+    borderWidth: 1,
+    margin:12,
+    padding: 10,
+    borderRadius: 2,
+  
+  },
+});
+  const signIn = async () => {
+    try {
+      const response = await fetch(
+        'https://ad04-185-52-93-76.ngrok-free.app/signin?email=' + email + '&pass=' + password,
+        {
+
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "ngrok-skip-browser-warning": "69420",
+              },
+            
+              })
+            
+            const data = await response.json();
+
+            if (data.success) {
+              navigation.navigate('Home');
+            } else {
+              console.log('Login failed');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+          }
+        };
+
+        const signUp = async () => {
+          try {
+            const response = await fetch(
+              'https://ad04-185-52-93-76.ngrok-free.app/signup?email=' + email + '&pass=' + password,
+              {
+      
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "ngrok-skip-browser-warning": "69420",
+                    },
+                  
+                    })
+                  
+                  const data = await response.json();
+      
+                  if (data.success) {
+                    onChangeText("Account created")
+                  } else {
+                    onChangeText("Creation unsuccesful")
+                  }
+                } catch (error) {
+                  console.error('Error:', error);
+                }
+              };
+    
+  return (
+    <View style={styles.container}>
+ <View>
+        <TextInput
+          style={styles.input}
+          value={email}
+          onChangeText={(email) => onChangeEmail(email)}
+        />
+        <TextInput
+          style={styles.input}
+          value={password}
+          onChangeText={(password) => onChangePass(password)}
+        />
+      </View>
+      <View>
+      <Button   buttonStyle={{
+        borderWidth: 2,
+        borderColor: 'white',
+        borderRadius: 30,}} title="Sign up" onPress={signUp} />
+        <Button 
+       buttonStyle={{ backgroundColor: 'red',
+        borderWidth: 2,
+        borderColor: 'white',
+        borderRadius: 30,}} title="Sign in" onPress={signIn} />
+        </View>
+        <Text>{text}</Text>
+         </View>
+  )
+}
+
 
 const HomeScreen = ({ navigation }) => {
   const [text, onChangeText] = useState("Enter Title");
