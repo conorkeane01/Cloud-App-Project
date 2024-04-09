@@ -16,11 +16,19 @@ const productSchema = new Schema({
   imageUrl: { type: String, required: true } 
 })
 
-const Product = mongoose.model('product', productSchema) // 'product' refers to the collection, so maps products collection to productSchema; see lecture notes
+const userSchema = new Schema({
+  email: { type: String, required: true },
+  cartId: { type: Number, required: true },
+  password: { type: String, required: true },
 
-let nextProductId = 0
-router.post('/addProduct', (req, res, next) => {
-  console.log(req.body)
+})
+const Product = mongoose.model('product', productSchema) // 'product' refers to the collection, so maps products collection to productSchema; see lecture notes
+const User = mongoose.model('User', userSchema)
+
+const Auth = require('./auth')
+
+router.post('/addProduct', Auth,(req, res, next) => {
+  let nextProductId = 1
   new Product({ ourId: '9' + nextProductId, name: req.body.title, size: 'large', imageUrl: req.body.imageUrl })
     .save()
     .then(result => {
@@ -45,42 +53,8 @@ router.get('/', (req, res, next) => {
     })
 })
 
-router.post('/', (req, res, next) => {
-  console.log(req.body.testData)
-  Product.find() // Always returns an array
-    .then(products => {
-      res.json({ 'POST Mongoose Products': products })
-    })
-    .catch(err => {
-      console.log('Failed to find: ' + err)
-      res.json({ 'Products': [] })
-    })
-})
 
-router.get('/getSpecificProduct', (req, res, next) => {
-  Product.find({ ourId: '1' }) // Always returns an array
-    .then(products => {
-      res.send('getSpecificProduct: ' + JSON.stringify(products[0])) // Return the first one found
-    })
-    .catch(err => {
-      console.log('Failed to find product: ' + err)
-      res.send('No product found')
-    })
-})
 
-router.get('/updateSpecificProduct', (req, res, next) => {
-  Product.find({ ourId: '1' }) // Always returns an array
-    .then(products => {
-      let specificProduct = products[0] // pick the first match
-      specificProduct.price = 99.95
-      specificProduct.save() // Should check for errors here too
-      res.redirect('/')
-    })
-    .catch(err => {
-      console.log('Failed to find product: ' + err)
-      res.send('No product found')
-    })
-})
 
 router.get('/deleteSpecificProduct', (req, res, next) => {
   if (!req.session.loggedIn) {
@@ -97,50 +71,64 @@ router.get('/deleteSpecificProduct', (req, res, next) => {
     })
 })
 
-router.get('/signin', async (req, res, next) => {
-  let theUser = {}
-  console.log(users)
-  for (let ii = 0; ii < users.length; ii++) {
-    if (req.query.email.trim() == users[ii].userEmail) {
-      theUser.password = users[ii].password
-      theUser.userEmail = users[ii].userEmail
-      theUser.cardId = users[ii].cardId
-    }
-  }
 
-  let checkPass = false
-  try {
-    checkPass = await bcrypt.compare(req.query.pass.trim() + process.env.EXTRA_BCRYPT_STRING, users[0].password)
-  } catch (err) {
-    console.log('bcrypt.compare err: ' + err)
-    res.send({ success: false })
-    return
-  }
-  if (!checkPass) {
-    res.send({ success: false })
-    return
-  }
-  req.session.isLoggedIn = true
-  req.session.theUser = theUser
-  res.send({ success: true, login: true })
+router.post('/signin', async (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password.trim(); // Trim the password
+  
+ 
+    const user = await User.findOne({ email: email });
+  
+    if (!user) {
+      return res.json({ success: false, message: "User doesn't exist" });
+    }
+    const checkPass = await bcrypt.compare(password + process.env.EXTRA_BCRYPT_STRING, user.password);
+  
+    if (checkPass) {
+      res.setHeader('Set-Cookie', 'isLoggedIn=true');
+      return res.json({ success: true, message: `Welcome: ${email}` });
+    } else {
+      console.log('Comparison failed');
+      return res.json({ success: false, message: "Incorrect password" });
+    }
+ 
+});
+router.get('/showUsers', (req, res, next) => {
+  User.find() // Always returns an array
+    .then(users => {
+      res.send({success: true, 'All the Users': users })
+    })
+    .catch(err => {
+      console.log('Failed to find: ' + err)
+      res.send({ success: false,'Products': [] })
+    })
 })
 
-const users = []
-router.get('/signup', (req, res, next) => {
-  // console.log(req.body.testData)
-  const userEmail = req.query.email.trim()
-  let password = req.query.pass.trim()
-  // do lots of checking / validation
-  password = bcrypt.hashSync(password + process.env.EXTRA_BCRYPT_STRING, 12),
-    users.push({ userEmail: userEmail, password: password, cartId: 1 })
-  console.log('users: ', users)
-  res.send({ success: true })
+router.post('/signup', (req, res, next) => {
+  console.log(req.body.email)
+  console.log(req.body.password)
+  email = req.body.email.trim()
+  password = req.body.password.trim()
+  password = bcrypt.hashSync(password + process.env.EXTRA_BCRYPT_STRING, 12)
+  new User({ email: req.body.email , password: password, cartId: 1 })
+    .save()
+    .then(result => {
+    
+      console.log('saved user to database')
+      res.redirect('/')
+    })
+    .catch(err => {
+      console.log('failed to user: ' + err)
+      res.redirect('/')
+    })
 })
 
 router.get('/signout', (req, res, next) => {
   let loggedIn = req.session.isLoggedIn
   req.session.isLoggedIn = false
-  res.send('done: ' + loggedIn)
+  console.log(loggedIn)
+  res.clearCookie('isLoggedIn')
+  res.send({success: true,message:'done: ' + loggedIn})
 })
 
 exports.routes = router
