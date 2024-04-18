@@ -24,7 +24,7 @@ app.use('/', index.routes)
 mongoose.set('strictQuery', true)
 mongoose.connect('mongodb://127.0.0.1:27123/db')
     .then(res => {
-        app.listen(3000)
+        app.listen(3010)
     })
     .catch(err => {
         console.log('Mongoose connection error: ' + err)
