@@ -80,10 +80,11 @@ export default function App() {
             options={{ title: "Welcome" }}
           />
           <Stack.Screen
-            name="Results"
-            component={ResultsScreen}
-            options={{ title: "Results" }}
-          />
+        name="List"
+        component={ListScreen}
+        options={{ title: 'List' }}
+      />
+         
           <Stack.Screen
             name="ThumbsUp"
             component={ThumbsUpScreen}
@@ -301,6 +302,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
+      <Button title="List Screen" onPress={() =>navigation.navigate("List")} />
       <Button title="Take Image" onPress={takeImageHandler} />
       <TextInput
         style={styles.input}
@@ -308,6 +310,7 @@ const HomeScreen = ({ navigation }) => {
         onChangeText={onChangeText}
       />
       <Text>{Result}</Text>
+ 
       {pickedImage ? (
         <Image source={{ uri: pickedImage }} style={styles.image} />
       ) : (
@@ -667,6 +670,62 @@ const ThumbsDownScreen = ({ navigation }) => {
     </View>
   );
 };
+
+const ListScreen = ({ navigation }) => {
+  const [text, setText] = useState([])
+ 
+  async function listAllRDBirecord() {
+    let result = await fetchItems()
+    console.log(JSON.stringify(result))
+    setItems(result);
+    setItemCount(result.length);
+   
+  }
+ 
+  const callAPI = async () => {
+    try {
+      const res = await fetch(
+        `http://34.239.36.76:3010`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            "ngrok-skip-browser-warning": "69420" // See: https://stackoverflow.com/questions/73017353/how-to-bypass-ngrok-browser-warning
+          },
+        //  body: JSON.stringify( { testData: 'Test data sent to server' } ) // Need to use POST to send body
+        }
+      )
+      const data = await res.json()
+      console.log(data)
+      setText(data["All the Products"])
+      console.log(text)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+  return (
+    <View >
+         <ScrollView>
+         <View style={styles.container}>
+       
+ 
+    <Button
+      title="Get"
+      onPress={callAPI}
+    />
+     <View>
+        <Text>Name:    Price:</Text>
+        {text.map((product) =>(
+          <Text>{product.name}:     €{product.price}</Text>
+        ))}
+      </View>
+    <StatusBar style="auto" />
+  </View>
+  </ScrollView>
+  </View>
+  )
+ 
+}
 
 // Include styles for inputs
 const styles2 = StyleSheet.create({
