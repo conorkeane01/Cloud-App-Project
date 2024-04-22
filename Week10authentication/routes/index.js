@@ -41,11 +41,11 @@ router.post("/addProduct", Auth, (req, res, next) => {
     .then((result) => {
       nextProductId++;
       console.log("saved product to database");
-      res.redirect("/");
+      res.send({ success: true,message: 'Success' });
     })
     .catch((err) => {
       console.log("failed to addAproduct: " + err);
-      res.redirect("/");
+      res.send({ success: false,message: 'Failure' });
     });
 });
 
@@ -60,7 +60,7 @@ router.get("/", (req, res, next) => {
     });
 });
 
-router.get("/deleteProduct", Auth, async (req, res) => {
+router.delete("/deleteProduct", Auth, async (req, res) => {
   try {
     const result = await Product.findOneAndDelete({ name: req.body.name });
     if (result) {

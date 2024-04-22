@@ -123,7 +123,7 @@ const LoginScreen = ({ navigation, route }) => {
   const signIn = async () => {
     try {
       const response = await fetch(
-        "https://ce4b-193-1-57-1.ngrok-free.app/signin",
+        "http://34.239.36.76:3010/signin",
         {
           method: "POST",
           headers: {
@@ -149,7 +149,7 @@ const LoginScreen = ({ navigation, route }) => {
   const signUp = async () => {
     try {
       const response = await fetch(
-        "https://ce4b-193-1-57-1.ngrok-free.app/signup",
+        "http://34.239.36.76:3010/signup",
         {
           method: "POST",
           headers: {
@@ -253,6 +253,7 @@ const HomeScreen = ({ navigation }) => {
       setResult("Failed to process image.");
     }
   };
+  
 
   function determineGesture(landmarks) {
     // Example indices: 4 - Thumb tip, 0 - Palm base, 5 - Index finger base
@@ -472,7 +473,7 @@ const callnAPIpost = async () => {
         console.log("File upload completed. Download URL:", downloadURL);
 
         const res = await fetch(
-          `https://ce4b-193-1-57-1.ngrok-free.app/addProduct`,
+          `http://34.239.36.76:3010/addProduct`,
           {
             method: "POST",
             headers: {
@@ -502,7 +503,7 @@ const callnAPIpost = async () => {
 const signOut = async () => {
   try {
     const response = await fetch(
-      "https://ce4b-193-1-57-1.ngrok-free.app/signout",
+      "http://34.239.36.76:3010/signout",
       {
         method: "GET",
         headers: {
@@ -581,7 +582,7 @@ const ThumbsUpScreen = ({ navigation }) => {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch('https://ce4b-193-1-57-1.ngrok-free.app/addProduct', {
+      const response = await fetch('http://34.239.36.76:3010/addProduct', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -631,7 +632,7 @@ const ThumbsDownScreen = ({ navigation }) => {
 
   const handleDeleteProduct = async () => {
     try {
-      const response = await fetch('https://ce4b-193-1-57-1.ngrok-free.app/deleteProduct', {
+      const response = await fetch('http://34.239.36.76:3010/deleteProduct', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
